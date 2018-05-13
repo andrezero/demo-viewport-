@@ -1,8 +1,8 @@
 import { View, Geometry } from '@picabia/picabia';
 
 class PlayerView extends View {
-  _constructor (model) {
-    this._model = model;
+  _constructor (player) {
+    this._player = player;
   }
 
   // -- view
@@ -14,9 +14,9 @@ class PlayerView extends View {
     const alpha = 1;
     const rgba = 'rgba(' + red + ',' + green + ',' + blue + ',' + alpha + ')';
 
-    const polygon = this._model._shape
-      .map((vector) => ({ x: vector.x + this._model._pos.x, y: vector.y + this._model._pos.y }))
-      .map(vector => Geometry.rotateVector(vector, -this._model._facing - Math.PI / 2, this._model._pos));
+    const polygon = this._player._shape
+      .map((vector) => ({ x: vector.x + this._player._pos.x, y: vector.y + this._player._pos.y }))
+      .map(vector => Geometry.rotateVector(vector, -this._player._facing - Math.PI / 2, this._player._pos));
 
     const renderer = this._renderer;
 

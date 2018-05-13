@@ -9,7 +9,7 @@ class Application {
 
     // -- model
 
-    this._model = new GameModel();
+    this._game = new GameModel();
 
     // -- view
 
@@ -31,7 +31,7 @@ class Application {
     this._container.on('resize', (size) => this._viewport.setSize(size));
     this._vm.addViewport(this._viewport);
 
-    this._view = this._vm.createView(GameView, [this._model]);
+    const rootView = new GameView(this._vm, [this._game]);
 
     // -- input
 
@@ -50,7 +50,7 @@ class Application {
       'shift': 'start'
     }, 'stop');
 
-    this._keyboard.on('control', (control) => this._model.input(control));
+    this._keyboard.on('control', (control) => this._game.input(control));
 
     // -- start
 
@@ -63,8 +63,8 @@ class Application {
       intervalMs: 1000 / 50
     };
     this._frame = new Frame(frameOptions);
-    this._frame.on('update', (delta, timestamp) => this._model.update(delta, timestamp));
-    this._frame.on('render', (delta, timestamp) => this._vm.render(delta, timestamp));
+    this._frame.on('update', (delta, timestamp) => this._game.update(delta, timestamp));
+    this._frame.on('render', (delta, timestamp) => this._vm.render(rootView, delta, timestamp));
     this._frame.start();
   }
 

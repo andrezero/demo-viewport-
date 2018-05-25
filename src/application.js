@@ -1,12 +1,11 @@
-import { Container, Frame, ViewManager, Viewport, KeyboardInput } from '@picabia/picabia';
+import { Container, Frame, ViewEngine, Viewport, CanvasRenderer2d, KeyboardInput } from '@picabia/picabia';
+import { FpsCanvas } from '@picabia/component-fps';
 
 import { GameModel } from './model/game';
 import { GameView } from './view/game';
 
 class Application {
   constructor (dom) {
-    this._dom = dom;
-
     // -- model
 
     this._game = new GameModel();
@@ -18,10 +17,12 @@ class Application {
       ratio: 1,
       maxPixels: 1000 * 1000
     };
-    this._container = new Container('main', this._dom, containerOptions);
+    this._container = new Container('main', dom, containerOptions);
 
-    this._vm = new ViewManager();
-    this._vm.addContainer(this._container);
+    this._v = new ViewEngine(dom);
+    this._v.add(this._container);
+
+    const renderer = this._v.add(new CanvasRenderer2d('2d'));
 
     const viewportOptions = {
       pos: { x: 100, y: 100 }
@@ -29,9 +30,10 @@ class Application {
     this._viewport = new Viewport('camera', viewportOptions);
 
     this._container.on('resize', (size) => this._viewport.setSize(size));
-    this._vm.addViewport(this._viewport);
+    this._v.add(this._viewport);
 
-    const rootView = new GameView(this._vm, [this._game]);
+    this._v.add(new FpsCanvas(this._v, { renderer }, this._container));
+    this._v.add(new GameView(this._v, { renderer }, this._game));
 
     // -- input
 
@@ -63,13 +65,14 @@ class Application {
       intervalMs: 1000 / 50
     };
     this._frame = new Frame(frameOptions);
-    this._frame.on('update', (delta, timestamp) => this._game.update(delta, timestamp));
-    this._frame.on('render', (delta, timestamp) => this._vm.render(rootView, delta, timestamp));
+    this._frame.on('update', (time) => this._game.update(time));
+    this._frame.on('render', (time) => this._v.render(time));
     this._frame.start();
   }
 
   resize () {
     this._container.resize();
+    this._v.resize();
   }
 }
 
